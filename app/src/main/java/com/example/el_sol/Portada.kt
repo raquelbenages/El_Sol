@@ -36,13 +36,11 @@ data class infoplaneta(
 )
 
 fun getinfoplaneta(): List<infoplaneta> = listOf(
-    infoplaneta(R.drawable.images,  "Antico Caffe Greco"),
-    infousuarios(R.drawable.images1, "Coffee Room"),
-    infousuarios(R.drawable.images2, "Coffee Ibiza",        "St.Colón, Madrid"),
-    infousuarios(R.drawable.images3, "Pudding Coffee Shop", "St.Diagonal, Barcelona"),
-    infousuarios(R.drawable.images4, "L'Express",           "St.Piccadilly Circus, London"),
-    infousuarios(R.drawable.images5, "Coffee Corner",       "St.Angel Guimerà, Valencia"),
-    infousuarios(R.drawable.images6, "Antico Caffe Greco",  "St.Italy, Rome"),
+    infoplaneta(R.drawable.corona_solar,  "Corona Solar"),
+    infoplaneta(R.drawable.erupcionsolar, "Erupcion solar"),
+    infoplaneta(R.drawable.espiculas, "Espiculas"),
+    infoplaneta(R.drawable.filamentos, "Filamentos"),
+    infoplaneta(R.drawable.magnetosfera, "Magnetosfera")
 )
 
 // ---------- App + Nav ----------
