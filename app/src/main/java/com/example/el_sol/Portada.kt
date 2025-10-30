@@ -54,10 +54,7 @@ fun Portada(navController: NavHostController){
     val sol = remember { getinfoplaneta() }
 
     Scaffold(
-        topBar = { MyBottomAppBar("El sol") },
-        floatingActionButton = {
-            ExtendedFloatingActionButton(onClick = { /* no-op */ }) { Text("Inc") }
-        }
+        bottomBar = { MyBottomAppBar("El sol") },
     ) { inner ->
         LazyColumn(
             contentPadding = inner,
