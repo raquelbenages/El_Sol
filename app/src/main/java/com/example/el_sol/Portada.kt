@@ -1,7 +1,9 @@
 package com.example.el_sol
 
+import android.R.attr.onClick
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
@@ -9,16 +11,20 @@ import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
+import androidx.compose.material3.AlertDialogDefaults.containerColor
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
@@ -88,6 +94,7 @@ fun Portada(navController: NavHostController){
 fun MyBottomAppBar(string: String) {
     var show by remember { mutableStateOf(false) }
     BottomAppBar(
+        containerColor = Color(0xFFF54927),
         actions = {
             IconButton(onClick = { /* do something */ }) {
                 Icon(Icons.Filled.ArrowBack, contentDescription = "Localized description")
@@ -98,6 +105,14 @@ fun MyBottomAppBar(string: String) {
                     contentDescription = "Localized description",
                 )
             }
+
+            FloatingActionButton(
+                onClick = {  },
+                modifier = Modifier)
+            {
+                Icon(Icons.Filled.Add, "Floating action button.")
+            }
+
         }
     )
 }
