@@ -4,10 +4,16 @@ import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
@@ -34,7 +40,8 @@ fun getinfoplaneta(): List<infoplaneta> = listOf(
     infoplaneta(R.drawable.erupcionsolar, "Erupcion solar"),
     infoplaneta(R.drawable.espiculas, "Espiculas"),
     infoplaneta(R.drawable.filamentos, "Filamentos"),
-    infoplaneta(R.drawable.magnetosfera, "Magnetosfera")
+    infoplaneta(R.drawable.magnetosfera, "Magnetosfera"),
+    infoplaneta(R.drawable.manchasolar, "Mancha Solar")
 )
 
 // ---------- App + Nav ----------
@@ -56,9 +63,11 @@ fun Portada(navController: NavHostController){
     Scaffold(
         bottomBar = { MyBottomAppBar("El sol") },
     ) { inner ->
-        LazyColumn(
-            contentPadding = inner,
+        LazyVerticalGrid (
+            contentPadding = PaddingValues(20.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp),
+            horizontalArrangement = Arrangement.spacedBy(10.dp),
+            columns = GridCells.Fixed( 2),
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 16.dp)
@@ -81,11 +90,11 @@ fun MyBottomAppBar(string: String) {
     BottomAppBar(
         actions = {
             IconButton(onClick = { /* do something */ }) {
-                Icon(Icons.Filled.Check, contentDescription = "Localized description")
+                Icon(Icons.Filled.ArrowBack, contentDescription = "Localized description")
             }
             IconButton(onClick = { /* do something */ }) {
                 Icon(
-                    Icons.Filled.Edit,
+                    Icons.Filled.Favorite,
                     contentDescription = "Localized description",
                 )
             }
@@ -101,24 +110,26 @@ fun SolCardSimple(
 ) {
     Card( modifier = Modifier.fillMaxWidth()) {
         Column {
-            Image(
-                painter = painterResource(foto),
-                contentDescription = nombre,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(160.dp),
-                contentScale = ContentScale.Crop
-            )
-            Column(Modifier.padding(16.dp)) {
-                Text(nombre,fontSize = 30.sp,)
-                Spacer(Modifier.height(15.dp))
-                Spacer(Modifier.height(8.dp))
-                Button(onClick = { /* reservar */ }, modifier = Modifier.align(Alignment.End)) {
-                    Text("Reserve")
+                Image(
+                    painter = painterResource(foto),
+                    contentDescription = nombre,
+                    modifier = Modifier
+                        .height(200.dp),
+                    contentScale = ContentScale.Crop
+                )
+                Column(Modifier.padding(16.dp)) {
+                    Text(nombre, fontSize = 15.sp,)
+                    IconButton(onClick = {  }, modifier = Modifier.align(Alignment.End)) {
+                        Icon(
+                            Icons.Filled.MoreVert,
+                            contentDescription = "Localized description",
+                        )
+                    }
+                    }
                 }
             }
-        }
+
     }
-}
+
 
 
