@@ -68,7 +68,8 @@ fun getinfoplaneta(): List<infoplaneta> = listOf(
 fun ElSolApp() {
     val nav = rememberNavController()
     NavHost(navController = nav, startDestination = "portada") {
-        composable("portada") { Portada(nav) }
+        composable("portada") { Portada(nav)}
+        composable ("Info") { Info() }
     }
 }
 
@@ -103,14 +104,14 @@ fun Portada(navController: NavHostController) {
                         NavigationDrawerItem(
                             label = { Text("Build") },
                             selected = false,
-                            onClick = { /* Handle click */ },
+                            onClick = {  navController.navigate("Portada")},
                             icon = { Icon(Icons.Filled.Build, contentDescription = "build")}
                         )
 
                         NavigationDrawerItem(
                             label = { Text("Info") },
                             selected = false,
-                            onClick = { /* Handle click */ },
+                            onClick = {navController.navigate("Info") },
                             icon = { Icon(Icons.Filled.Info, contentDescription = "info")}
                         )
 
