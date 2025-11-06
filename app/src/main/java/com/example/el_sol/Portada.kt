@@ -1,18 +1,15 @@
 package com.example.el_sol
 
 import android.R.attr.onClick
-import android.app.ProgressDialog.show
+import android.R.attr.text
 import android.widget.Toast
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -21,15 +18,10 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.*
-import androidx.compose.material3.AlertDialogDefaults.containerColor
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -38,6 +30,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
@@ -77,8 +70,7 @@ fun ElSolApp() {
 // ---------- Main ----------
 @Composable
 fun Portada(navController: NavHostController) {
-
-    val sol = remember { getinfoplaneta() }
+    var sol by remember { mutableStateOf(getinfoplaneta()) }  // 👈 lista mutable
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
 
@@ -86,13 +78,12 @@ fun Portada(navController: NavHostController) {
     fun DetailedDrawerExample(
         content: @Composable (PaddingValues) -> Unit
     ) {
-
-        // ---------- Menu desplegable lateral ----------
         ModalNavigationDrawer(
             drawerContent = {
                 ModalDrawerSheet {
                     Column(
-                        modifier = Modifier.padding(horizontal = 16.dp)
+                        modifier = Modifier
+                            .padding(horizontal = 16.dp)
                             .verticalScroll(rememberScrollState())
                     ) {
                         Image(
@@ -104,34 +95,27 @@ fun Portada(navController: NavHostController) {
                         NavigationDrawerItem(
                             label = { Text("Build") },
                             selected = false,
-                            onClick = {  navController.navigate("Portada")},
-                            icon = { Icon(Icons.Filled.Build, contentDescription = "build")}
+                            onClick = { navController.navigate("Portada") },
+                            icon = { Icon(Icons.Filled.Build, contentDescription = "build") }
                         )
-
                         NavigationDrawerItem(
                             label = { Text("Info") },
                             selected = false,
-                            onClick = {navController.navigate("Info") },
-                            icon = { Icon(Icons.Filled.Info, contentDescription = "info")}
-                        )
-
-                        NavigationDrawerItem(
-                            label = { Text("Email") },
-                            selected = false,
-                            onClick = { /* Handle click */ },
-                            icon = { Icon(Icons.Filled.Email, contentDescription = "Email")}
+                            onClick = { navController.navigate("Info") },
+                            icon = { Icon(Icons.Filled.Info, contentDescription = "info") }
                         )
                     }
                 }
             },
             drawerState = drawerState
         ) {
-            // ---------- Main info ----------
             Scaffold(
-                bottomBar = { MyBottomAppBar(
-                    string = "El sol",
-                    onNavClick = { scope.launch { drawerState.open() } }
-                ) },
+                bottomBar = {
+                    MyBottomAppBar(
+                        string = "El sol",
+                        onNavClick = { scope.launch { drawerState.open() } }
+                    )
+                }
             ) { inner ->
                 LazyVerticalGrid(
                     contentPadding = PaddingValues(20.dp),
@@ -142,10 +126,14 @@ fun Portada(navController: NavHostController) {
                         .fillMaxSize()
                         .padding(horizontal = 16.dp)
                 ) {
-                    items(sol) { c ->
+                    items(sol, key = { it.nombre }) { c ->
                         SolCardSimple(
                             foto = c.foto,
-                            nombre = c.nombre
+                            nombre = c.nombre,
+                            onDelete = {
+                                sol = sol.filterNot { it.nombre == c.nombre } // 👈 elimina la card
+                            }
+                            //ONCOPY Y YA
                         )
                     }
                     item { Spacer(Modifier.height(80.dp)) }
@@ -153,8 +141,10 @@ fun Portada(navController: NavHostController) {
             }
         }
     }
-    DetailedDrawerExample { /* inner padding no usado en tu versión */ }
+
+    DetailedDrawerExample { }
 }
+
 
 
     // ---------- Menu inferior ----------
@@ -185,18 +175,28 @@ fun Portada(navController: NavHostController) {
 fun SolCardSimple(
     foto: Int,
     nombre: String,
-
+    onDelete: () -> Unit, // 👈 nueva función
 ) {
     val context = LocalContext.current
-    var show by remember { mutableStateOf(false) }
-    Card(modifier = Modifier.fillMaxWidth().clickable {
-        Toast
-            .makeText(context, nombre, Toast.LENGTH_SHORT)
-            .show()
-    }) {
+    var menuAbierto by remember { mutableStateOf(false) }
+    var pastedImageUri by remember { mutableStateOf<android.net.Uri?>(null) }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable {
+                Toast.makeText(context, nombre, Toast.LENGTH_SHORT).show()
+            }
+    ) {
         Column {
+            val painter = if (pastedImageUri != null) {
+                rememberAsyncImagePainter(model = pastedImageUri)
+            } else {
+                painterResource(foto)
+            }
+
             Image(
-                painter = painterResource(foto),
+                painter = painter,
                 contentDescription = nombre,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -217,36 +217,44 @@ fun SolCardSimple(
                 )
 
                 Box {
-                    IconButton(onClick = { show = !show }) {
-                        Icon(
-                            imageVector = Icons.Filled.MoreVert,
-                            contentDescription = "Más opciones"
-                        )
+                    IconButton(onClick = { menuAbierto = !menuAbierto }) {
+                        Icon(Icons.Filled.MoreVert, contentDescription = "Más opciones")
                     }
 
                     DropdownMenu(
-                        expanded = show,
-                        onDismissRequest = { show = false }
+                        expanded = menuAbierto,
+                        onDismissRequest = { menuAbierto = false }
                     ) {
                         DropdownMenuItem(
-                            text = { Text("Copiar") },
+                            text = { Text("Copiar imagen") },
                             onClick = {
-                                // acción copiar
-                                show = false
+                                copyDrawableToClipboard(context, foto, label = nombre)
+                                Toast.makeText(context, "Imagen copiada", Toast.LENGTH_SHORT).show()
+                                menuAbierto = false
                             },
-                            leadingIcon = {
-                                Icon(Icons.Filled.Add, contentDescription = "Copiar")
-                            }
+                            leadingIcon = { Icon(Icons.Filled.Add, contentDescription = "Copiar") }
+                        )
+                        DropdownMenuItem(
+                            text = { Text("Pegar imagen") },
+                            onClick = {
+                                val uri = getImageUriFromClipboard(context)
+                                if (uri != null) {
+                                    pastedImageUri = uri
+                                    Toast.makeText(context, "Imagen pegada", Toast.LENGTH_SHORT).show()
+                                } else {
+                                    Toast.makeText(context, "No hay imagen en el portapapeles", Toast.LENGTH_SHORT).show()
+                                }
+                                menuAbierto = false
+                            },
+                            leadingIcon = { Icon(Icons.Filled.Check, contentDescription = "Pegar") }
                         )
                         DropdownMenuItem(
                             text = { Text("Eliminar") },
                             onClick = {
-                                // acción eliminar
-                                show = false
+                                onDelete() // 👈 llama a la función pasada desde Portada
+                                menuAbierto = false
                             },
-                            leadingIcon = {
-                                Icon(Icons.Filled.Delete, contentDescription = "Eliminar")
-                            }
+                            leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = "Eliminar") }
                         )
                     }
                 }
@@ -254,6 +262,3 @@ fun SolCardSimple(
         }
     }
 }
-
-
-
