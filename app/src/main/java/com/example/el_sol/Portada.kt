@@ -13,12 +13,12 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Build
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Favorite
@@ -33,25 +33,22 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.google.rpc.Help
 import kotlinx.coroutines.launch
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Badge
 import androidx.compose.material3.BadgedBox
-import androidx.compose.material3.SnackbarHost
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
-
+import androidx.compose.ui.draw.clip
 
 
 data class infoplaneta(
@@ -71,12 +68,13 @@ fun getinfoplaneta(): List<infoplaneta> = listOf(
 // ---------- App + Nav ----------
 @Composable
 fun ElSolApp() {
-    val nav = rememberNavController()
-    NavHost(navController = nav, startDestination = "portada") {
-        composable("portada") { Portada(nav)}
-        composable ("Info") { Info() }
+    val navController = rememberNavController()
+    NavHost(navController = navController, startDestination = "portada") {
+        composable("portada") { Portada(navController) }
+        composable("Info") { Info(navController) }
     }
 }
+
 
 
 // ---------- Main ----------
@@ -122,7 +120,7 @@ fun Portada(navController: NavHostController) {
                         NavigationDrawerItem(
                             label = { Text("Email") },
                             selected = false,
-                            onClick = { navController.navigate("Email") },
+                            onClick = {  },
                             icon = { Icon(Icons.Filled.Email, contentDescription = "email") }
                         )
                     }
@@ -160,7 +158,7 @@ fun Portada(navController: NavHostController) {
                             onCopy = { nombreCopiado ->
                                 Toast.makeText(
                                     navController.context,
-                                    "Copiaste el nombre de $nombreCopiado",
+                                    "Copiaste el $nombreCopiado",
                                     Toast.LENGTH_SHORT
                                 ).show()
                             },
@@ -185,7 +183,7 @@ fun MyBottomAppBarHoisted(
     string: String,
     count: Int,
     onFavClick: () -> Unit,
-    onNavClick: () -> Unit
+    onNavClick: () -> Unit = {}
 ) {
     BottomAppBar(
         containerColor = Color(0xFFF54927),
@@ -232,6 +230,9 @@ fun SolCardSimple(
         modifier = Modifier
             .fillMaxWidth()
             .clickable { onCardClick(nombre) }
+            .padding(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 6.dp),
+        colors = CardDefaults.cardColors(containerColor = Color(0xFFFDFDFD))
     ) {
         Column {
             Image(
@@ -239,7 +240,8 @@ fun SolCardSimple(
                 contentDescription = nombre,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(200.dp),
+                    .aspectRatio(1f) // cuadrada
+                    .clip(RoundedCornerShape(topStart = 8.dp, topEnd = 8.dp)),
                 contentScale = ContentScale.Crop
             )
 
