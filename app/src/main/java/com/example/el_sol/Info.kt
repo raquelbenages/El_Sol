@@ -20,68 +20,47 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.ui.graphics.Color
-
-
 @Composable
-fun Info(navController: NavHostController? = null) {
+fun InfoBody() {
     var showDatePicker by remember { mutableStateOf(false) }
-    var favCount by rememberSaveable { mutableIntStateOf(0) }
-    val snackbarHostState = remember { SnackbarHostState() }
 
-    Scaffold(
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        bottomBar = {
-            MyBottomAppBar(
-                string = "El Sol",
-                onNavClick = { navController?.popBackStack() }
-            )
-        }
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(24.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        Text(
+            text = "Información",
+            style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold)
+        )
+        Spacer(Modifier.height(8.dp))
+        Text(
+            text = "Descarga detalles o elige una fecha para visitar la plataforma.",
+            style = MaterialTheme.typography.bodyMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
 
-    ) { innerPadding ->
-        Column(
+        Spacer(Modifier.height(24.dp))
+        IndeterminateCircularIndicator()
+        Spacer(Modifier.height(24.dp))
+
+        Button(
+            onClick = { showDatePicker = true },
             modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "Información",
-                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold)
+                .fillMaxWidth()
+                .height(48.dp)
+        ) { Text("Seleccionar fecha") }
+
+        if (showDatePicker) {
+            DatePickerModal(
+                onDateSelected = { /* manejar fecha */ },
+                onDismiss = { showDatePicker = false }
             )
-            Spacer(Modifier.height(8.dp))
-            Text(
-                text = "Descarga detalles o elige una fecha para visitar la plataforma.",
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-
-            Spacer(Modifier.height(24.dp))
-
-            IndeterminateCircularIndicator()
-
-            Spacer(Modifier.height(24.dp))
-
-            Button(
-                onClick = { showDatePicker = true },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp)
-            ) {
-                Text("Seleccionar fecha")
-            }
-
-            if (showDatePicker) {
-                DatePickerModal(
-                    onDateSelected = { selectedDate ->
-                        println("Fecha seleccionada: $selectedDate")
-                    },
-                    onDismiss = { showDatePicker = false }
-                )
-            }
         }
     }
 }
+
 
 @Composable
 fun MyBottomAppBar(

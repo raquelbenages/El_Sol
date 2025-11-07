@@ -69,113 +69,120 @@ fun getinfoplaneta(): List<infoplaneta> = listOf(
 @Composable
 fun ElSolApp() {
     val navController = rememberNavController()
-    NavHost(navController = navController, startDestination = "portada") {
-        composable("portada") { Portada(navController) }
-        composable("Info") { Info(navController) }
-    }
-}
 
 
-
-// ---------- Main ----------
-@Composable
-fun Portada(navController: NavHostController) {
-    var sol by remember { mutableStateOf(getinfoplaneta()) }  // 👈 lista mutable
+    var sol by remember { mutableStateOf(getinfoplaneta()) }  // lista mutable compartida
     val drawerState = rememberDrawerState(initialValue = DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     var favCount by rememberSaveable { mutableIntStateOf(0) }
 
-
-    @Composable
-    fun DetailedDrawerExample(
-        content: @Composable (PaddingValues) -> Unit
-    ) {
-        ModalNavigationDrawer(
-            drawerContent = {
-                ModalDrawerSheet {
-                    Column(
-                        modifier = Modifier
-                            .padding(horizontal = 16.dp)
-                            .verticalScroll(rememberScrollState())
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.erupcionsolar),
-                            contentDescription = "FOTO NAVEGACION",
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                        NavigationDrawerItem(
-                            label = { Text("Build") },
-                            selected = false,
-                            onClick = { navController.navigate("Portada") },
-                            icon = { Icon(Icons.Filled.Build, contentDescription = "build") }
-                        )
-                        NavigationDrawerItem(
-                            label = { Text("Info") },
-                            selected = false,
-                            onClick = { navController.navigate("Info") },
-                            icon = { Icon(Icons.Filled.Info, contentDescription = "info") }
-                        )
-                        NavigationDrawerItem(
-                            label = { Text("Email") },
-                            selected = false,
-                            onClick = {  },
-                            icon = { Icon(Icons.Filled.Email, contentDescription = "email") }
-                        )
-                    }
-                }
-            },
-            drawerState = drawerState
-        ) {
-            Scaffold(
-                bottomBar = {
-                    MyBottomAppBarHoisted(
-                        string = "El sol",
-                        count = favCount,
-                        onFavClick = { favCount++ },
-                        onNavClick = { scope.launch { drawerState.open() } }
-                    )
-                },
-                snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
-            ) { inner ->
-                LazyVerticalGrid(
-                    contentPadding = PaddingValues(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    horizontalArrangement = Arrangement.spacedBy(10.dp),
-                    columns = GridCells.Fixed(2),
+    ModalNavigationDrawer(
+        drawerState = drawerState,
+        drawerContent = {
+            ModalDrawerSheet {
+                Column(
                     modifier = Modifier
-                        .fillMaxSize()
                         .padding(horizontal = 16.dp)
+                        .verticalScroll(rememberScrollState())
                 ) {
-                    items(sol, key = { it.nombre }) { c ->
-                        SolCardSimple(
-                            foto = c.foto,
-                            nombre = c.nombre,
-                            onCardClick = { nombre ->
-                                scope.launch { snackbarHostState.showSnackbar("Pulsaste: $nombre") }
-                            },
-                            onCopy = { nombreCopiado ->
-                                Toast.makeText(
-                                    navController.context,
-                                    "Copiaste el $nombreCopiado",
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            },
-                            onDelete = {
-                                sol = sol.filterNot { it.nombre == c.nombre }
-                            }
-                        )
-                    }
-                    item { Spacer(Modifier.height(80.dp)) }
+                    Image(
+                        painter = painterResource(id = R.drawable.erupcionsolar),
+                        contentDescription = "FOTO NAVEGACION",
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                    NavigationDrawerItem(
+                        label = { Text("Portada") },
+                        selected = false,
+                        onClick = { navController.navigate("portada") }, // 👈 en minúsculas
+                        icon = { Icon(Icons.Filled.Build, contentDescription = "build") }
+                    )
+                    NavigationDrawerItem(
+                        label = { Text("Info") },
+                        selected = false,
+                        onClick = { navController.navigate("Info") },
+                        icon = { Icon(Icons.Filled.Info, contentDescription = "info") }
+                    )
+                    NavigationDrawerItem(
+                        label = { Text("Email") },
+                        selected = false,
+                        onClick = { },
+                        icon = { Icon(Icons.Filled.Email, contentDescription = "email") }
+                    )
+                }
+            }
+        }
+    ) {
+        Scaffold(
+            bottomBar = {
+                MyBottomAppBarHoisted(
+                    string = "El sol",
+                    count = favCount,
+                    onFavClick = { favCount++ },
+                    onNavClick = { scope.launch { drawerState.open() } }
+                )
+            },
+            snackbarHost = { SnackbarHost(hostState = snackbarHostState) }
+        ) { inner ->
+            NavHost(
+                navController = navController,
+                startDestination = "portada",
+                modifier = Modifier.padding(inner)
+            ) {
+                composable("portada") {
+                    PortadaBody(
+                        sol = sol,
+                        onCopy = { item ->
+                            val copia = item.copy(nombre = "${item.nombre} (copia)")
+                            sol = sol + copia
+                            scope.launch { snackbarHostState.showSnackbar("Tarjeta duplicada") }
+                        },
+                        onDelete = { item ->
+                            sol = sol.filterNot { it == item }
+                        },
+                        onCardClick = { nombre ->
+                            scope.launch { snackbarHostState.showSnackbar(" $nombre") }
+                        }
+                    )
+                }
+                composable("Info") {
+                    InfoBody()
                 }
             }
         }
     }
-
-    DetailedDrawerExample { }
 }
 
+
+@Composable
+fun PortadaBody(
+    sol: List<infoplaneta>,
+    onCopy: (infoplaneta) -> Unit,
+    onDelete: (infoplaneta) -> Unit,
+    onCardClick: (String) -> Unit
+) {
+    LazyVerticalGrid(
+        contentPadding = PaddingValues(20.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        columns = GridCells.Fixed(2),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 16.dp)
+    ) {
+        items(sol) { c ->
+            SolCardSimple(
+                foto = c.foto,
+                nombre = c.nombre,
+                onCardClick = onCardClick,
+                onCopy = { onCopy(c) },
+                onDelete = { onDelete(c) }
+            )
+        }
+        item { Spacer(Modifier.height(80.dp)) }
+    }
+}
 
 //LA BARRA DE ABAJO
 @Composable
@@ -218,7 +225,7 @@ fun MyBottomAppBarHoisted(
 fun SolCardSimple(
     @DrawableRes foto: Int,
     nombre: String,
-    onCopy: (String) -> Unit,
+    onCopy: () -> Unit,
     onDelete: () -> Unit,
     onCardClick: (String) -> Unit,
     ) {
@@ -265,9 +272,7 @@ fun SolCardSimple(
                         DropdownMenuItem(
                             text = { Text("Copiar") },
                             onClick = {
-                                val clip = ClipData.newPlainText("nombre", nombre)
-                                clipboard.setPrimaryClip(clip)
-                                onCopy(nombre)
+                                onCopy()
                                 menuAbierto = false
                             },
                             leadingIcon = { Icon(Icons.Filled.Add, contentDescription = "Copiar") }
@@ -276,11 +281,11 @@ fun SolCardSimple(
                             text = { Text("Eliminar") },
                             onClick = {
                                 onDelete()
-                                Toast.makeText(context, "Tarjeta eliminada", Toast.LENGTH_SHORT).show()
                                 menuAbierto = false
                             },
                             leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = "Eliminar") }
                         )
+
                     }
                 }
             }
