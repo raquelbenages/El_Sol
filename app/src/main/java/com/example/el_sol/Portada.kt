@@ -95,14 +95,24 @@ fun ElSolApp() {
                     NavigationDrawerItem(
                         label = { Text("Portada") },
                         selected = false,
-                        onClick = { navController.navigate("portada") }, // 👈 en minúsculas
+                        onClick = {
+                            scope.launch {
+                                drawerState.close()
+                                navController.navigate("portada")
+                            }
+                        },
                         icon = { Icon(Icons.Filled.Build, contentDescription = "build") }
                     )
                     NavigationDrawerItem(
                         label = { Text("Info") },
                         selected = false,
-                        onClick = { navController.navigate("Info") },
-                        icon = { Icon(Icons.Filled.Info, contentDescription = "info") }
+                        onClick = {
+                            scope.launch {
+                                drawerState.close()          // 👈 Cierra el menú
+                                navController.navigate("Info") // Navega después
+                            }
+                        },
+                        icon = { Icon(Icons.Filled.Info, contentDescription = "info") },
                     )
                     NavigationDrawerItem(
                         label = { Text("Email") },
